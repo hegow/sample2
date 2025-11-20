@@ -1,0 +1,5 @@
+{
+  "name": "SoofiDesign Studio Portal",
+  "description": "A liquid-glass aesthetic client portal for collecting project requirements with local storage backup and PHP API integration.",
+  "requestFramePermissions": []
+}
