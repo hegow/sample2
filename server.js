@@ -11,23 +11,41 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'database.json');
+const DIST_DIR = path.join(__dirname, 'dist');
+
+console.log('Initializing Server...');
+console.log('Database File:', DB_FILE);
+console.log('Static Files Dir:', DIST_DIR);
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
-app.use(express.static(path.join(__dirname, 'dist')));
+
+// Serve static files if directory exists
+if (fs.existsSync(DIST_DIR)) {
+    app.use(express.static(DIST_DIR));
+} else {
+    console.warn('WARNING: "dist" directory not found. Run "npm run build" to generate frontend assets.');
+}
 
 // Ensure database file exists
 if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({}, null, 2));
+    try {
+        fs.writeFileSync(DB_FILE, JSON.stringify({}, null, 2));
+        console.log('Created new database.json');
+    } catch (err) {
+        console.error('Error creating database.json:', err);
+    }
 }
 
 // Helper to read DB
 const readDB = () => {
     try {
+        if (!fs.existsSync(DB_FILE)) return {};
         const data = fs.readFileSync(DB_FILE, 'utf8');
         return JSON.parse(data);
     } catch (err) {
+        console.error('Error reading DB:', err);
         return {};
     }
 };
@@ -76,7 +94,20 @@ app.get('/api/load/:username', (req, res) => {
 
 // Catch-all handler to serve React app for any other route
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    const indexFile = path.join(DIST_DIR, 'index.html');
+    if (fs.existsSync(indexFile)) {
+        res.sendFile(indexFile);
+    } else {
+        res.status(500).send(`
+            <div style="font-family: sans-serif; text-align: center; padding: 50px; background: #1a1a1a; color: white;">
+                <h1>⚠️ Frontend Build Missing</h1>
+                <p>The server is running, but the frontend files could not be found.</p>
+                <p>Please run the following command in your terminal:</p>
+                <code style="background: #333; padding: 10px; display: block; margin: 20px auto; max-width: 300px; border-radius: 5px;">npm run build</code>
+                <p>Then refresh this page.</p>
+            </div>
+        `);
+    }
 });
 
 app.listen(PORT, () => {
