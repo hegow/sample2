@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -100,5 +101,18 @@ const writeDB = (data) => {
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`\n✅ Server is running on http://localhost:${PORT}`);
+    const url = `http://localhost:${PORT}`;
+    console.log(`\n✅ Server is running on ${url}`);
+    
+    // Logic to open browser automatically based on OS
+    const startCommand = process.platform === 'darwin' ? 'open' 
+                       : process.platform === 'win32' ? 'start' 
+                       : 'xdg-open';
+    
+    exec(`${startCommand} ${url}`, (error) => {
+        if (error) {
+            // If it fails (e.g. on a server without a screen), just log.
+            // console.log('Could not open browser automatically.');
+        }
+    });
 });
