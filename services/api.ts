@@ -1,7 +1,7 @@
 import { ClientData } from '../types';
 
-// آدرس سرور - در حالت پروداکشن خالی است (نسبی)
-// اگر روی پورت متفاوتی تست می‌کنید، آدرس کامل بدهید
+// آدرس API - در پروداکشن (وقتی فرانت و بک‌اند روی یک سرور هستند) خالی است
+// در توسعه، Vite Proxy این را به localhost:3000 هدایت می‌کند
 const API_BASE = ''; 
 
 export const saveData = async (username: string, data: ClientData): Promise<{ success: boolean; message: string }> => {
@@ -40,7 +40,7 @@ export const loadData = async (username: string): Promise<ClientData | null> => 
   }
 };
 
-// بکاپ لوکال (جهت اطمینان)
+// بکاپ لوکال (جهت اطمینان اضافی)
 export const saveBackup = (username: string, data: ClientData) => {
   try {
     localStorage.setItem(`backup_${username}`, JSON.stringify(data));
